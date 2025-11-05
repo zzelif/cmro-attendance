@@ -31,6 +31,10 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 https://docs.google.com/document/d/1Lkmw5cj5Try0DOh2Zmn53RZI3dfYNqTfwhbYyqRFKOY/edit?usp=sharing
 
+## Check this guide for reference
+
+(./CMRO_Attendance_Frontend_Guide.md)
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
