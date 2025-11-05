@@ -1,7 +1,7 @@
 // lib/schemas/auth.ts
 import { z } from "zod";
 
-export const LoginSchema = z.object({
+export const loginSchema = z.object({
   email: z.string().email("Invalid email address").min(1, "Email is required"),
   password: z
     .string()
@@ -9,4 +9,4 @@ export const LoginSchema = z.object({
     .min(1, "Password is required"),
 });
 
-export type LoginInput = z.infer<typeof LoginSchema>;
+export type LoginSchema = z.infer<typeof loginSchema>;

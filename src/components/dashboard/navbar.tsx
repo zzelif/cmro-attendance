@@ -1,11 +1,11 @@
 // app/(dashboard)/_components/navbar.tsx
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { signOutUser } from "@/actions/authActions";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 interface NavbarProps {
   fullName: string;
@@ -21,13 +21,12 @@ export function Navbar({
   role,
 }: NavbarProps) {
   const router = useRouter();
-  const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleLogout() {
     setIsLoading(true);
     try {
-      await supabase.auth.signOut();
+      signOutUser();
       router.push("/login");
     } finally {
       setIsLoading(false);
@@ -37,7 +36,7 @@ export function Navbar({
   // Role-based header content
   const headerContent = {
     member: {
-      title: `Welcome ${fullName}`,
+      title: `Welcome, ${fullName}`,
       subtitle:
         memberType && department ? `${memberType} • ${department}` : "Member",
     },
