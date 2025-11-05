@@ -6,17 +6,17 @@
 
 ## 📚 TABLE OF CONTENTS
 
-1. [Project Introduction](#project-introduction)
-2. [Getting Started](#getting-started)
-3. [Understanding the Project Structure](#understanding-the-project-structure)
-4. [Next.js App Router Explained](#nextjs-app-router-explained)
-5. [Components Deep Dive](#components-deep-dive)
-6. [Server vs Client Components](#server-vs-client-components)
-7. [Authentication Flow](#authentication-flow)
-8. [Working with Forms](#working-with-forms)
-9. [Styling with Tailwind CSS](#styling-with-tailwind-css)
-10. [Common Tasks & How-To's](#common-tasks--how-tos)
-11. [Debugging Tips](#debugging-tips)
+1. [Project Introduction](#1-project-introduction)
+2. [Getting Started](#2-getting-started)
+3. [Understanding the Project Structure](#3-understanding-the-project-structure)
+4. [Next.js App Router Explained](#4-nextjs-app-router-explained)
+5. [Components Deep Dive](#5-components-deep-dive)
+6. [Server vs Client Components](#6-server-vs-client-components)
+7. [Authentication Flow](#7-authentication-flow)
+8. [Working with Forms](#8-working-with-forms)
+9. [Styling with Tailwind CSS](#9-styling-with-tailwind-css)
+10. [Common Tasks & How-To's](#10-common-tasks--how-tos)
+11. [Debugging Tips](#11-debugging-tips)
 
 ---
 
