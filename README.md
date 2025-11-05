@@ -2,16 +2,23 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+First, clone the repo:
+
+```bash
+git clone https://github.com/zzelif/cmro-attendance.git
+git cd cmro-attendance
+```
+
+Second, install the dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -19,6 +26,10 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Chech niyo palagi yung sa Google Docs for reference
+
+https://docs.google.com/document/d/1Lkmw5cj5Try0DOh2Zmn53RZI3dfYNqTfwhbYyqRFKOY/edit?usp=sharing
 
 ## Learn More
 
