@@ -6,7 +6,7 @@ First, clone the repo:
 
 ```bash
 git clone https://github.com/zzelif/cmro-attendance.git
-git cd cmro-attendance
+cd cmro-attendance
 ```
 
 Second, install the dependencies:
