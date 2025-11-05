@@ -8,6 +8,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginSchema, type LoginInput } from "@/lib/schemas/LoginSchema";
 import { AlertCircle } from "lucide-react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -66,11 +69,20 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow">
-        <h1 className="text-2xl font-bold text-center mb-8">
-          Attendance System
-        </h1>
+    <div className="flex items-center justify-center">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow flex flex-col gap-4 justify-center">
+        <div className="flex justify-center">
+          <div className="bg-yellow-400 flex items-center justify-center w-3/12 p-2">
+            <Image
+              src="/cmro-icon.png"
+              alt="CMRO Logo"
+              width={100}
+              height={100}
+            />
+          </div>
+        </div>
+        <h1 className="text-2xl font-bold text-center">CMR Opportunities</h1>
+        <h3 className="text-center">Attendance Monitoring System</h3>
 
         {globalError && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-2">
@@ -86,6 +98,7 @@ export default function LoginForm() {
             <input
               {...register("email")}
               type="email"
+              placeholder="Enter your email address"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isLoading}
             />
@@ -102,6 +115,7 @@ export default function LoginForm() {
             <input
               {...register("password")}
               type="password"
+              placeholder="Enter your password"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isLoading}
             />
@@ -113,16 +127,23 @@ export default function LoginForm() {
           </div>
 
           {/* Submit */}
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+            variant="default"
+            className="w-full bg-black text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
           >
-            {isLoading ? "Logging in..." : "Log In"}
-          </button>
+            {isLoading ? (
+              <>
+                <Spinner /> Logging in...
+              </>
+            ) : (
+              "Log In"
+            )}
+          </Button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-4">
+        <p className="text-center text-sm text-gray-600">
           Only admins can create accounts
         </p>
       </div>
