@@ -73,7 +73,8 @@ export async function getDashboardStats() {
 
     const { data: members, error: membersError } = await supabaseAdmin
       .from("members")
-      .select("id, total_required_hours, is_active");
+      .select("id, total_required_hours, is_active")
+      .in("role", ["member", "admin"]);
 
     if (membersError) throw membersError;
 
@@ -140,6 +141,7 @@ export async function getInterns() {
       .select(
         "id, full_name, department, member_type, role, total_required_hours, is_active"
       )
+      .in("role", ["member", "admin"])
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -212,7 +214,7 @@ export async function getAttendanceLogs() {
         time_out,
         status,
         time_in_photo_url,
-        member:members!attendance_logs_member_id_fkey(full_name, department)
+        member:members!attendance_logs_member_id_fkey(full_name, department, role)
       `
       )
       .order("date", { ascending: false })
@@ -222,7 +224,9 @@ export async function getAttendanceLogs() {
 
     if (error) throw error;
 
-    const formattedLogs = logs.map((log) => ({
+    const filteredLogs = logs.filter((log) => log.member?.role !== "super");
+
+    const formattedLogs = filteredLogs.map((log) => ({
       id: log.id,
       fullName: log.member?.full_name || "Unknown",
       department: log.member?.department || "N/A",
@@ -262,6 +266,7 @@ export async function getInternOverview() {
     const { data: members, error } = await supabaseAdmin
       .from("members")
       .select("id, full_name, member_type, total_required_hours")
+      .in("role", ["member", "admin"])
       .eq("is_active", true)
       .limit(3);
 

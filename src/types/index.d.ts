@@ -31,6 +31,7 @@ interface Intern {
   id: string;
   fullName: string;
   department: string;
+  type: string;
   role: string;
   hours: string;
   progress: string;
@@ -61,6 +62,7 @@ interface AttendanceLogResponse {
   member: {
     full_name: string;
     department: string;
+    role: string;
   } | null;
 }
 
@@ -73,4 +75,11 @@ interface CreateInternData {
   type: string;
   requiredHours: string;
   startDate: Date;
+}
+
+interface CreateExecutiveData {
+  fullName: string;
+  email: string;
+  temporaryPassword: string;
+  type: string;
 }

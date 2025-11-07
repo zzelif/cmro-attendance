@@ -1,12 +1,12 @@
-// src/app/(dashboard)/admin/page.tsx
+// src\app\(dashboard)\super\page.tsx
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Users, TrendingUp, Clock } from "lucide-react";
 import { getDashboardStats } from "@/actions/adminActions";
-import { AdminDashboardClient } from "./AdminDashboardClient";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, TrendingUp, Clock } from "lucide-react";
 import { Suspense } from "react";
+import { ExecutiveDashboardClient } from "./ExecutiveDashboardClient";
 
-export default async function AdminPage() {
+export default async function ExecutivePage() {
   const statsResult = await getDashboardStats();
   const stats = statsResult.success
     ? statsResult.stats
@@ -16,17 +16,13 @@ export default async function AdminPage() {
         avgCompletion: "0%",
         totalHours: 0,
       };
-
   return (
     <div className="flex gap-5 sm:gap-6 flex-col p-2 sm:p-4 mx-auto">
       {/* Welcome Header */}
       <div className="mb-2">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-          Admin Dashboard
+          Executive Dashboard
         </h1>
-        <p className="text-sm sm:text-base text-gray-600">
-          Manage intern attendance and progress
-        </p>
       </div>
 
       {/* Intern Stats */}
@@ -87,9 +83,8 @@ export default async function AdminPage() {
         </Card>
       </div>
 
-      {/* Client-side component */}
       <Suspense fallback={<div>Loading...</div>}>
-        <AdminDashboardClient />
+        <ExecutiveDashboardClient />
       </Suspense>
     </div>
   );

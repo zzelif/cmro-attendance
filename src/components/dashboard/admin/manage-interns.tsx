@@ -51,6 +51,7 @@ export function ManageInterns({
             <TableRow className="bg-gray-50">
               <TableHead className="font-semibold">Full Name</TableHead>
               <TableHead className="font-semibold">Department</TableHead>
+              <TableHead className="font-semibold">Type</TableHead>
               <TableHead className="font-semibold">Role</TableHead>
               <TableHead className="font-semibold">Hours</TableHead>
               <TableHead className="font-semibold">Progress</TableHead>
@@ -83,6 +84,7 @@ export function ManageInterns({
                     <span className="font-medium">{intern.fullName}</span>
                   </TableCell>
                   <TableCell>{intern.department}</TableCell>
+                  <TableCell>{intern.type}</TableCell>
                   <TableCell>{intern.role}</TableCell>
                   <TableCell>{intern.hours}</TableCell>
                   <TableCell>{intern.progress}</TableCell>

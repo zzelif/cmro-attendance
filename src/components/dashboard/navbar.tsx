@@ -35,7 +35,7 @@ export function Navbar({ role }: NavbarProps) {
       title: "Admin Dashboard",
     },
     super: {
-      title: "Executive Dashboard",
+      title: "Executive Management",
     },
   };
 
