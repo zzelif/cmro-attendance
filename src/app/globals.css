@@ -1,122 +1,222 @@
+/* src/app/globals.css */
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
+@theme {
+  /* Brand Colors - HSL format */
+  --color-brand-yellow: hsl(51, 100%, 50%);
+  --color-brand-yellow-light: hsl(54, 100%, 50%);
+  --color-brand-yellow-dark: hsl(45, 100%, 51%);
+  --color-brand-green: hsl(148, 100%, 38%);
+  --color-brand-green-dark: hsl(112, 100%, 33%);
+  --color-brand-header: hsl(53, 71%, 13%);
+  --color-brand-logo: hsl(51, 99%, 51%);
+  --color-success: hsl(112, 100%, 33%);
+  --color-success-light: hsl(148, 100%, 38%);
+
+  /* Design System */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Chart colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Border radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Font families */
+  --font-sans: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Courier New",
+    monospace;
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* Light mode - Yellow/Gold theme */
+  --background: hsl(0, 0%, 94%);
+  --foreground: hsl(0, 0%, 7%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(0, 0%, 7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 7%);
+  --primary: hsl(45, 100%, 51%);
+  --primary-foreground: hsl(53, 71%, 13%);
+  --secondary: hsl(0, 0%, 94%);
+  --secondary-foreground: hsl(0, 0%, 7%);
+  --muted: hsl(0, 0%, 94%);
+  --muted-foreground: hsl(0, 0%, 33%);
+  --accent: hsl(45, 100%, 51%);
+  --accent-foreground: hsl(53, 71%, 13%);
+  --destructive: hsl(0, 100%, 35%);
+  --border: hsl(0, 0%, 80%);
+  --input: hsl(0, 0%, 80%);
+  --ring: hsl(45, 100%, 51%);
+
+  /* Chart colors */
+  --chart-1: hsl(51, 100%, 50%);
+  --chart-2: hsl(148, 100%, 38%);
+  --chart-3: hsl(45, 100%, 51%);
+  --chart-4: hsl(51, 99%, 51%);
+  --chart-5: hsl(112, 100%, 33%);
+
+  /* Sidebar */
+  --sidebar: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(0, 0%, 7%);
+  --sidebar-primary: hsl(45, 100%, 51%);
+  --sidebar-primary-foreground: hsl(53, 71%, 13%);
+  --sidebar-accent: hsl(0, 0%, 94%);
+  --sidebar-accent-foreground: hsl(0, 0%, 7%);
+  --sidebar-border: hsl(0, 0%, 80%);
+  --sidebar-ring: hsl(45, 100%, 51%);
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --background: hsl(0, 0%, 7%);
+  --foreground: hsl(0, 0%, 94%);
+  --card: hsl(0, 0%, 10%);
+  --card-foreground: hsl(0, 0%, 94%);
+  --popover: hsl(0, 0%, 10%);
+  --popover-foreground: hsl(0, 0%, 94%);
+  --primary: hsl(51, 100%, 50%);
+  --primary-foreground: hsl(0, 0%, 7%);
+  --secondary: hsl(0, 0%, 20%);
+  --secondary-foreground: hsl(0, 0%, 94%);
+  --muted: hsl(0, 0%, 20%);
+  --muted-foreground: hsl(0, 0%, 67%);
+  --accent: hsl(51, 100%, 50%);
+  --accent-foreground: hsl(0, 0%, 7%);
+  --destructive: hsl(0, 100%, 65%);
+  --border: hsl(0, 0%, 100% / 0.1);
+  --input: hsl(0, 0%, 100% / 0.15);
+  --ring: hsl(51, 100%, 50%);
+
+  --sidebar: hsl(0, 0%, 10%);
+  --sidebar-foreground: hsl(0, 0%, 94%);
+  --sidebar-primary: hsl(51, 100%, 50%);
+  --sidebar-primary-foreground: hsl(0, 0%, 7%);
+  --sidebar-accent: hsl(0, 0%, 20%);
+  --sidebar-accent-foreground: hsl(0, 0%, 94%);
+  --sidebar-border: hsl(0, 0%, 100% / 0.1);
+  --sidebar-ring: hsl(51, 100%, 50%);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+  }
+}
+
+@layer utilities {
+  /* Brand color utilities */
+  .bg-brand-yellow {
+    background-color: hsl(51, 100%, 50%);
+  }
+
+  .bg-brand-yellow-light {
+    background-color: hsl(54, 100%, 50%);
+  }
+
+  .bg-brand-yellow-dark {
+    background-color: hsl(45, 100%, 51%);
+  }
+
+  .bg-brand-yellow-gradient {
+    background: linear-gradient(
+      to bottom right,
+      hsl(51, 100%, 50%),
+      hsl(54, 100%, 50%),
+      hsl(45, 100%, 51%)
+    );
+  }
+
+  .bg-brand-green {
+    background-color: hsl(148, 100%, 38%);
+  }
+
+  .bg-brand-green-dark {
+    background-color: hsl(112, 100%, 33%);
+  }
+
+  .bg-brand-header {
+    background-color: hsl(53, 71%, 13%);
+  }
+
+  .text-brand-yellow {
+    color: hsl(51, 100%, 50%);
+  }
+
+  .text-brand-header {
+    color: hsl(53, 71%, 13%);
+  }
+
+  .text-brand-logo {
+    color: hsl(51, 99%, 51%);
+  }
+
+  .text-brand-green {
+    color: hsl(148, 100%, 38%);
+  }
+
+  .text-success {
+    color: hsl(112, 100%, 33%);
+  }
+
+  .bg-success {
+    background-color: hsl(112, 100%, 33%);
+  }
+
+  .border-brand-yellow {
+    border-color: hsl(45, 100%, 51%);
+  }
+
+  .hover\:bg-brand-yellow-light:hover {
+    background-color: hsl(54, 100%, 50%);
+  }
+
+  .hover\:bg-brand-yellow:hover {
+    background-color: hsl(51, 100%, 50%);
   }
 }

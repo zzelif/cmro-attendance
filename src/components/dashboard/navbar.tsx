@@ -6,20 +6,13 @@ import { useRouter } from "next/navigation";
 import { signOutUser } from "@/actions/authActions";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 interface NavbarProps {
-  fullName: string;
-  memberType?: string;
-  department?: string;
   role: string;
 }
 
-export function Navbar({
-  fullName,
-  memberType,
-  department,
-  role,
-}: NavbarProps) {
+export function Navbar({ role }: NavbarProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,30 +29,31 @@ export function Navbar({
   // Role-based header content
   const headerContent = {
     member: {
-      title: `Welcome, ${fullName}`,
-      subtitle:
-        memberType && department ? `${memberType} • ${department}` : "Member",
+      title: "Attendance Management - Intern",
     },
     admin: {
       title: "Admin Dashboard",
-      subtitle: "Manage intern attendance and progress",
     },
     super: {
       title: "Executive Dashboard",
-      subtitle: "High-level analytics and oversight",
     },
   };
 
-  const { title, subtitle } =
+  const { title } =
     headerContent[role as keyof typeof headerContent] || headerContent.member;
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
+    <nav className="bg-brand-header shadow-sm">
       <div className="px-6 py-4 flex items-center justify-between">
         {/* Left side - Role-based header */}
-        <div className="flex-1">
-          <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-          <p className="text-sm text-gray-600 mt-0.5">{subtitle}</p>
+        <div className="flex-1 flex-row flex gap-8">
+          <Image src="/cmro-icon.png" alt="CMRO Logo" width={50} height={50} />
+          <div>
+            <h1 className="text-xl font-bold text-brand-yellow">
+              CMR Opportunities
+            </h1>
+            <p className="text-sm text-muted mt-0.5">{title}</p>
+          </div>
         </div>
 
         {/* Right side - Logout button */}
@@ -68,10 +62,10 @@ export function Navbar({
           disabled={isLoading}
           variant="ghost"
           size="sm"
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="text-white font-bold text-lg hover:bg-transparent hover:text-brand-yellow"
         >
-          <LogOut className="w-4 h-4 mr-2" />
-          {isLoading ? "Logging out..." : "Logout"}
+          <LogOut className="mr-2" />
+          {isLoading ? "Logging out..." : "Log Out"}
         </Button>
       </div>
     </nav>
