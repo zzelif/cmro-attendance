@@ -63,6 +63,8 @@ const startTimeOutCamera = async () => {
     setTimeOutStream(mediaStream);
     setShowTimeOutCamera(true);
 
+    setShowCamera(true);
+
     setTimeout(() => {
       if (timeOutVideoRef.current) timeOutVideoRef.current.srcObject = mediaStream;
     }, 100);
@@ -279,7 +281,7 @@ const saveTimeOutPhoto = async () => {
         .single();
 
       if (attendanceData) setHasTimedIn(true);
-      if (attendanceData.time_out) setHasTimedOut(true);
+      if (attendanceData?.time_out) setHasTimedOut(true);
     };
 
     fetchMemberId();
@@ -517,63 +519,93 @@ const saveTimeOutPhoto = async () => {
 
       {/* Camera or Captured Image */}
       <div className="w-full bg-black rounded-xl overflow-hidden">
-        {!capturedPhoto ? (
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full h-[450px] object-cover"
-          />
+        {showTimeOutCamera ? (
+          !capturedTimeOutPhoto ? (
+            <video
+              ref={timeOutVideoRef}
+              autoPlay
+              playsInline
+              className="w-full h-[450px] object-cover"
+            />
+          ) : (
+            <img
+              src={capturedTimeOutPhoto!}
+              alt="Captured"
+              className="w-full h-[450px] object-cover"
+            />
+          )
         ) : (
-          <img
-            src={capturedPhoto}
-            alt="Captured"
-            className="w-full h-[450px] object-cover"
-          />
+          !capturedPhoto ? (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="w-full h-[450px] object-cover"
+            />
+          ) : (
+            <img
+              src={capturedPhoto!}
+              alt="Captured"
+              className="w-full h-[450px] object-cover"
+            />
+          )
         )}
       </div>
 
-      {/* Buttons */}
+
       <div className="flex justify-center gap-4 mt-6">
-
-        {!capturedPhoto && (
-          <Button
-            onClick={capturePhoto}
-            className="bg-[#FFC107] hover:bg-[#FFD700] text-black px-6 py-3 text-lg flex items-center gap-2"
-          >
-            <Camera />
-            Capture
+      
+      {/* Capture Button */}
+      {!showTimeOutCamera ? (
+        !capturedPhoto && (
+          <Button onClick={capturePhoto} className="bg-[#FFC107] ...">
+            <Camera /> Capture
           </Button>
-        )}
+        )
+      ) : (
+        !capturedTimeOutPhoto && (
+          <Button onClick={captureTimeOutPhoto} className="bg-[#FFC107] ...">
+            <Camera /> Capture
+          </Button>
+        )
+      )}
 
-        {capturedPhoto && (
-          <>
-            <Button
-              onClick={restartCamera}
-              className="bg-gray-200 hover:bg-gray-300 px-6 py-3 text-lg flex items-center gap-2"
-            >
-              <RefreshCcw />
-              Retake
-            </Button>
+      {/* Retake Button */}
+      {!showTimeOutCamera ? (
+        capturedPhoto && (
+          <Button onClick={restartCamera} className="bg-gray-200 ...">
+            <RefreshCcw /> Retake
+          </Button>
+        )
+      ) : (
+        capturedTimeOutPhoto && (
+          <Button
+            onClick={startTimeOutCamera} // restart time out camera
+            className="bg-gray-200 ..."
+          >
+            <RefreshCcw /> Retake
+          </Button>
+        )
+      )}
 
-            <Button
-              onClick={showTimeOutCamera ? saveTimeOutPhoto : savePhoto}
-              className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 text-lg flex items-center gap-2"
-            >
-              <Camera />
-              Save
-            </Button>
-          </>
-        )}
+      {/* Save Button */}
+      <Button
+        onClick={showTimeOutCamera ? saveTimeOutPhoto : savePhoto}
+        className="bg-green-500 ..."
+      >
+        <Camera /> Save
+      </Button>
 
-        <Button
-          onClick={stopCamera}
-          variant="outline"
-          className="px-6 py-3 bg-white text-black hover:bg-gray-200"
-        >
-          Cancel
-        </Button>
-      </div>
+      {/* Cancel Button */}
+      <Button
+        onClick={showTimeOutCamera ? stopTimeOutCamera : stopCamera}
+        variant="outline"
+        className="px-6 py-3 bg-white text-black hover:bg-gray-200"
+      >
+        Cancel
+      </Button>
+    </div>
+
     </div>
   </div>
 )}
