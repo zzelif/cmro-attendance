@@ -7,6 +7,24 @@ import { useState, useRef, useEffect } from "react";
 import { X, Camera, RefreshCcw } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 
+function isWithinTimeRange(start: string, end: string) {
+  const now = new Date();
+  const current = now.getHours() + now.getMinutes() / 60;
+
+  const [sH, sM] = start.split(":").map(Number);
+  const [eH, eM] = end.split(":").map(Number);
+
+  const startTime = sH + sM / 60;
+  const endTime = eH + eM / 60;
+
+  // handles ranges like 19:00 -> 00:00
+  if (endTime < startTime) {
+    return current >= startTime || current <= endTime;
+  }
+
+  return current >= startTime && current <= endTime;
+}
+
 
 
 export default function MemberPage() {
@@ -17,6 +35,7 @@ export default function MemberPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [memberId, setMemberId] = useState<string | null>(null);
   const [hasTimedIn, setHasTimedIn] = useState(false);
+  const canTimeIn = isWithinTimeRange("09:00", "18:00"); //Duration Hours for Time In
 
   const [showTimeOutCamera, setShowTimeOutCamera] = useState(false);
   const [timeOutStream, setTimeOutStream] = useState<MediaStream | null>(null);
@@ -24,8 +43,28 @@ export default function MemberPage() {
   const [timeOutError, setTimeOutError] = useState("");
   const timeOutVideoRef = useRef<HTMLVideoElement | null>(null);
   const [hasTimedOut, setHasTimedOut] = useState(false);
+  const canTimeOut = isWithinTimeRange("19:00", "00:00"); //Duration Hours for Time Out
+
+  const [totalRequiredHours, setTotalRequiredHours] = useState<number>(0);
+  const [hoursRendered, setHoursRendered] = useState<number>(0);
+  const [hoursRemaining, setHoursRemaining] = useState<number>(0);
+  const [completionPercentage, setCompletionPercentage] = useState<number>(0);
 
 
+  
+
+
+  const [notification, setNotification] = useState<{
+  type: "success" | "error";
+  message: string;
+} | null>(null);
+
+  const showNotification = (type: "success" | "error", message: string, duration = 3000) => {
+  setNotification({ type, message });
+  setTimeout(() => setNotification(null), duration); // hide after 3s
+};
+
+  // --- Start Camera ---q
   const startCamera = async () => {
     try {
       setError("");
@@ -129,19 +168,31 @@ const saveTimeOutPhoto = async () => {
       .update({
         time_out: new Date().toISOString(),
         time_out_photo_url: photoURL,
+        status: 'approved', // <- add this
       })
       .eq("member_id", memberId)
       .eq("date", new Date().toISOString().split("T")[0]);
     if (attendanceError) throw attendanceError;
 
-    alert("⏱️ Time Out recorded successfully!");
+    showNotification("success", "⏱️ Time Out recorded successfully!");
     setHasTimedOut(true);
     stopTimeOutCamera();
+    await fetchMemberStats(); // refresh stats after saving
   } catch (err) {
     console.error("Error saving Time Out:", err);
-    alert("Failed to save Time Out. See console for details.");
+    showNotification("error", "Failed to save Time In. See console for details.");
   }
 };
+
+  useEffect(() => {
+    const loadStats = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await fetchMemberStats();
+    };
+
+    loadStats();
+  }, []);
+
 
 
 
@@ -203,7 +254,8 @@ const saveTimeOutPhoto = async () => {
         .eq("user_id", user.id)
         .single();
       if (memberError || !membersData) throw memberError || new Error("Member not found");
-      const memberId = membersData.id;
+      // ✅ Use state setter instead of local variable
+      setMemberId(membersData.id);
 
       // 3. Upload photo
       const fileName = `time_in_${Date.now()}.jpg`;
@@ -232,24 +284,30 @@ const saveTimeOutPhoto = async () => {
           member_id: memberId,
           time_in: new Date().toISOString(),
           time_in_photo_url: photoURL,
+          status: 'approved', // <- add this
         });
       if (attendanceError) throw attendanceError;
 
-      alert("⏱️ Time In recorded successfully!");
+      showNotification("success", "⏱️ Time In recorded successfully!");
       setHasTimedIn(true);
       stopCamera();
+      await fetchMemberStats(); // refresh stats after saving
     } catch (err) {
       console.error("Error saving Time In:", err);
-      alert("Failed to save Time In. See console for details.");
+      showNotification("error", "Failed to save Time In. See console for details.");
     }
   };
 
   
-  useEffect(() => {
-    return () => {
-      if (stream) stream.getTracks().forEach(track => track.stop());
+    useEffect(() => {
+    const loadStats = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await fetchMemberStats();
     };
-  }, [stream]);
+
+    loadStats();
+  }, []);
+
 
 
   useEffect(() => {
@@ -286,6 +344,38 @@ const saveTimeOutPhoto = async () => {
 
     fetchMemberId();
   }, []);
+
+
+    // Fetch member stats
+    const fetchMemberStats = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: memberStats, error } = await supabase
+      .from("member_summary")
+      .select("id, total_required_hours, hours_rendered, hours_remaining, completion_percentage")
+      .eq("user_id", user.id)
+      .maybeSingle(); // <-- use maybeSingle
+
+    if (error) {
+      console.error("Error fetching member stats", error);
+      return;
+    }
+
+    // set defaults if no stats exist
+    setMemberId(memberStats?.id || null);
+    setTotalRequiredHours(memberStats?.total_required_hours || 0);
+    setHoursRendered(memberStats?.hours_rendered || 0);
+    setHoursRemaining(memberStats?.hours_remaining || 0);
+    setCompletionPercentage(memberStats?.completion_percentage || 0);
+  };
+
+
+    useEffect(() => {
+      if (memberId) fetchMemberStats();
+    }, [memberId]); // fetch stats only after memberId is ready
+
+
 
 
   // useEffect(() => {
@@ -337,9 +427,9 @@ const saveTimeOutPhoto = async () => {
             <Button
               type="button"
               onClick={startCamera}
-              disabled={hasTimedIn} // <-- disables button if already timed in
+              disabled={hasTimedIn || !canTimeIn} // <-- ADD THIS
               className={`w-1/2 flex-1 h-20 sm:h-24 font-semibold shadow-md ${
-                hasTimedIn
+                hasTimedIn || !canTimeIn
                   ? "bg-gray-300 cursor-not-allowed"
                   : "bg-black hover:bg-[#FFD700] text-muted"
               }`}
@@ -348,19 +438,22 @@ const saveTimeOutPhoto = async () => {
               <div className="flex justify-center items-center flex-col h-full gap-2">
                 <Clock className="size-5 sm:size-6" />
                 <span className="text-sm sm:text-base">
-                  {hasTimedIn ? "Already Timed In" : "Time In"}
+                  {hasTimedIn
+                    ? "Already Timed In"
+                    : !canTimeIn
+                      ? "Not Allowed"
+                      : "Time In"}
                 </span>
               </div>
             </Button>
 
 
-
             <Button
               type="button"
               onClick={startTimeOutCamera}
-              disabled={!hasTimedIn || hasTimedOut} // disables if already timed out
+              disabled={!hasTimedIn || hasTimedOut || !canTimeOut} // <-- ADDED !canTimeOut
               className={`w-1/2 flex-1 h-20 sm:h-24 font-semibold shadow-md ${
-                !hasTimedIn || hasTimedOut
+                !hasTimedIn || hasTimedOut || !canTimeOut
                   ? "bg-gray-300 cursor-not-allowed"
                   : "bg-black hover:bg-[#FFD700] text-muted"
               }`}
@@ -369,10 +462,15 @@ const saveTimeOutPhoto = async () => {
               <div className="flex justify-center items-center flex-col h-full gap-2">
                 <LogOut className="size-5 sm:size-6" />
                 <span className="text-sm sm:text-base">
-                  {hasTimedOut ? "Already Timed Out" : "Time Out"}
+                  {hasTimedOut
+                    ? "Already Timed Out"
+                    : !canTimeOut
+                      ? "Not Allowed"
+                      : "Time Out"}
                 </span>
               </div>
             </Button>
+
 
           </div>
 
@@ -399,7 +497,7 @@ const saveTimeOutPhoto = async () => {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Halow hrs
+              {totalRequiredHours ?? 0} hrs
             </div>
           </CardContent>
         </Card>
@@ -412,7 +510,7 @@ const saveTimeOutPhoto = async () => {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="text-2xl sm:text-3xl font-bold text-brand-green-dark">
-              halowww hrs
+              {hoursRendered ?? 0} hrs
             </div>
           </CardContent>
         </Card>
@@ -425,7 +523,7 @@ const saveTimeOutPhoto = async () => {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="text-2xl sm:text-3xl font-bold text-orange-600">
-              heyyyy hrs
+              {hoursRemaining ?? 0} hrs
             </div>
           </CardContent>
         </Card>
@@ -438,11 +536,12 @@ const saveTimeOutPhoto = async () => {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="text-2xl sm:text-3xl font-bold text-[#FFC107]">
-              hay%
+              {completionPercentage ?? 0}%
             </div>
           </CardContent>
         </Card>
       </div>
+
 
       {/* Progress Bar */}
       <Card className="border-gray-300 shadow-sm">
@@ -498,6 +597,19 @@ const saveTimeOutPhoto = async () => {
           </div>
         </CardContent>
       </Card>
+
+
+      {/* Notification */}
+      {notification && (
+        <div
+          className={`fixed top-5 right-5 p-4 rounded shadow-lg text-white ${
+            notification.type === "success" ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
+
 
       {/* Camera Modal */}
       {showCamera && (
