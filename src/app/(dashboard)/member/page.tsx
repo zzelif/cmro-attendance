@@ -25,6 +25,32 @@ function isWithinTimeRange(start: string, end: string) {
   return current >= startTime && current <= endTime;
 }
 
+type MemberAttendanceRecord = {
+  id: string;
+  date: string | null;
+  status: "pending" | "approved" | "rejected";
+  time_in: string | null;
+  time_out: string | null;
+};
+
+function formatDate(value?: string | null) {
+  if (!value) return "--";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "--";
+  return parsed.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function formatTime(value?: string | null) {
+  if (!value) return "--";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "--";
+  return parsed.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
 
 
 export default function MemberPage() {
@@ -50,6 +76,19 @@ export default function MemberPage() {
   const [hoursRemaining, setHoursRemaining] = useState<number>(0);
   const [completionPercentage, setCompletionPercentage] = useState<number>(0);
 
+  const [recentAttendance, setRecentAttendance] = useState<MemberAttendanceRecord[]>([]);
+  const [recentAttendanceLoading, setRecentAttendanceLoading] = useState(false);
+  const statusStyles: Record<MemberAttendanceRecord["status"], string> = {
+    approved: "text-brand-green-dark bg-brand-green-dark/10",
+    pending: "text-yellow-600 bg-yellow-100",
+    rejected: "text-red-600 bg-red-100",
+  };
+  const statusLabels: Record<MemberAttendanceRecord["status"], string> = {
+    approved: "Approved",
+    pending: "Pending",
+    rejected: "Rejected",
+  };
+
 
   
 
@@ -63,6 +102,52 @@ export default function MemberPage() {
   setNotification({ type, message });
   setTimeout(() => setNotification(null), duration); // hide after 3s
 };
+
+  const fetchRecentAttendance = async (memberRecordId: string) => {
+    setRecentAttendanceLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("attendance_logs")
+        .select("id, date, status, time_in, time_out")
+        .eq("member_id", memberRecordId)
+        .order("date", { ascending: false })
+        .limit(4);
+
+      if (error) throw error;
+
+      setRecentAttendance((data as MemberAttendanceRecord[]) ?? []);
+    } catch (err) {
+      console.error("Error fetching recent attendance:", err);
+      setRecentAttendance([]);
+    } finally {
+      setRecentAttendanceLoading(false);
+    }
+  };
+
+  const fetchMemberStats = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: memberStats, error } = await supabase
+      .from("member_summary")
+      .select(
+        "total_required_hours, hours_rendered, hours_remaining, completion_percentage"
+      )
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching member stats", error);
+      return;
+    }
+
+    setTotalRequiredHours(memberStats?.total_required_hours || 0);
+    setHoursRendered(memberStats?.hours_rendered || 0);
+    setHoursRemaining(memberStats?.hours_remaining || 0);
+    setCompletionPercentage(memberStats?.completion_percentage || 0);
+  };
 
   // --- Start Camera ---q
   const startCamera = async () => {
@@ -178,6 +263,7 @@ const saveTimeOutPhoto = async () => {
     setHasTimedOut(true);
     stopTimeOutCamera();
     await fetchMemberStats(); // refresh stats after saving
+    await fetchRecentAttendance(memberId);
   } catch (err) {
     console.error("Error saving Time Out:", err);
     showNotification("error", "Failed to save Time In. See console for details.");
@@ -185,12 +271,7 @@ const saveTimeOutPhoto = async () => {
 };
 
   useEffect(() => {
-    const loadStats = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) await fetchMemberStats();
-    };
-
-    loadStats();
+    fetchMemberStats();
   }, []);
 
 
@@ -254,8 +335,9 @@ const saveTimeOutPhoto = async () => {
         .eq("user_id", user.id)
         .single();
       if (memberError || !membersData) throw memberError || new Error("Member not found");
+      const memberRecordId = membersData.id;
       // ✅ Use state setter instead of local variable
-      setMemberId(membersData.id);
+      setMemberId(memberRecordId);
 
       // 3. Upload photo
       const fileName = `time_in_${Date.now()}.jpg`;
@@ -281,7 +363,7 @@ const saveTimeOutPhoto = async () => {
       const { data: attendanceData, error: attendanceError } = await supabase
         .from("attendance_logs")
         .insert({
-          member_id: memberId,
+          member_id: memberRecordId,
           time_in: new Date().toISOString(),
           time_in_photo_url: photoURL,
           status: 'approved', // <- add this
@@ -292,6 +374,7 @@ const saveTimeOutPhoto = async () => {
       setHasTimedIn(true);
       stopCamera();
       await fetchMemberStats(); // refresh stats after saving
+      await fetchRecentAttendance(memberRecordId);
     } catch (err) {
       console.error("Error saving Time In:", err);
       showNotification("error", "Failed to save Time In. See console for details.");
@@ -326,17 +409,18 @@ const saveTimeOutPhoto = async () => {
         .eq("user_id", user.id)
         .single();
 
-      if (memberError || !memberData) return console.error("Member not found", memberError);
+      if (memberError || !memberData)
+        return console.error("Member not found", memberError);
 
       setMemberId(memberData.id);
 
       // Check if already timed in today
-      const { data: attendanceData, error: attendanceError } = await supabase
+      const { data: attendanceData } = await supabase
         .from("attendance_logs")
-        .select("*")
+        .select("time_out")
         .eq("member_id", memberData.id)
         .eq("date", new Date().toISOString().split("T")[0])
-        .single();
+        .maybeSingle();
 
       if (attendanceData) setHasTimedIn(true);
       if (attendanceData?.time_out) setHasTimedOut(true);
@@ -345,35 +429,15 @@ const saveTimeOutPhoto = async () => {
     fetchMemberId();
   }, []);
 
+  useEffect(() => {
+    if (memberId) fetchMemberStats();
+  }, [memberId]);
 
-    // Fetch member stats
-    const fetchMemberStats = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: memberStats, error } = await supabase
-      .from("member_summary")
-      .select("id, total_required_hours, hours_rendered, hours_remaining, completion_percentage")
-      .eq("user_id", user.id)
-      .maybeSingle(); // <-- use maybeSingle
-
-    if (error) {
-      console.error("Error fetching member stats", error);
-      return;
+  useEffect(() => {
+    if (memberId) {
+      fetchRecentAttendance(memberId);
     }
-
-    // set defaults if no stats exist
-    setMemberId(memberStats?.id || null);
-    setTotalRequiredHours(memberStats?.total_required_hours || 0);
-    setHoursRendered(memberStats?.hours_rendered || 0);
-    setHoursRemaining(memberStats?.hours_remaining || 0);
-    setCompletionPercentage(memberStats?.completion_percentage || 0);
-  };
-
-
-    useEffect(() => {
-      if (memberId) fetchMemberStats();
-    }, [memberId]); // fetch stats only after memberId is ready
+  }, [memberId]);
 
 
 
@@ -560,13 +624,13 @@ const saveTimeOutPhoto = async () => {
 
       {/* Recent Attendance */}
       <Card className="border-gray-300 shadow-sm">
-        <CardContent className="">
+        <CardContent>
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <h3 className="font-bold text-base sm:text-lg text-gray-900">
                 Recent Attendance
               </h3>
-              <p className="text-sm text-gray-600">Your Attendance History</p>
+              <p className="text-sm text-gray-600">Latest entries from Supabase</p>
             </div>
             <Button
               variant="ghost"
@@ -578,23 +642,39 @@ const saveTimeOutPhoto = async () => {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border border-gray-300 rounded-lg bg-white hover:shadow-md transition-shadow">
-              <p className="text-sm font-semibold text-gray-900">halowwww</p>
-              <p className="text-xs text-gray-600 mt-1">heyyy</p>
-              <span className="inline-block mt-2 text-xs font-medium text-brand-green-dark bg-brand-green-dark/10 px-2 py-1 rounded">
-                Approved
-              </span>
+          {recentAttendanceLoading ? (
+            <div className="py-8 text-center text-gray-500 text-sm">
+              Loading recent attendance...
             </div>
-
-            <div className="p-4 border border-gray-300 rounded-lg bg-white hover:shadow-md transition-shadow">
-              <p className="text-sm font-semibold text-gray-900">halowwww</p>
-              <p className="text-xs text-gray-600 mt-1">heyyy</p>
-              <span className="inline-block mt-2 text-xs font-medium text-yellow-600 bg-yellow-100 px-2 py-1 rounded">
-                Pending
-              </span>
+          ) : recentAttendance.length === 0 ? (
+            <div className="py-8 text-center text-gray-500 text-sm">
+              No attendance records yet.
             </div>
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {recentAttendance.map((record) => (
+                <div
+                  key={record.id}
+                  className="p-4 border border-gray-300 rounded-lg bg-white hover:shadow-md transition-shadow"
+                >
+                  <p className="text-sm font-semibold text-gray-900">
+                    {formatDate(record.date ?? record.time_in ?? record.time_out)}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Time In: {formatTime(record.time_in)}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Time Out: {formatTime(record.time_out)}
+                  </p>
+                  <span
+                    className={`inline-block mt-2 text-xs font-medium px-2 py-1 rounded ${statusStyles[record.status]}`}
+                  >
+                    {statusLabels[record.status]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
